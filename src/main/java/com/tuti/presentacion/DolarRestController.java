@@ -13,6 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tuti.dto.CotizacionDolarDTO;
 import com.tuti.exception.Excepcion;
 import com.tuti.servicios.DolarProxy;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * Recurso Personas
  * @author dardo
@@ -20,6 +25,8 @@ import com.tuti.servicios.DolarProxy;
  */
 @RestController
 @RequestMapping("/dolar")
+//@Api(tags = { SwaggerConfig.DOLAR })
+@Tag(name = "Dolar", description = "Cotización del dólar")
 public class DolarRestController {
 	
 	@Autowired
@@ -33,6 +40,10 @@ public class DolarRestController {
 	 * 	curl --location --request GET 'http://localhost:8081/dolar'
 	 * @return Cotización actual del dolar
 	 */
+	@Operation(
+		      summary = "Obtiene la cotización actual del dolar",
+		      description = "Obtiene la cotizacion actual del dolar invocando al servicio ofrecido por www.dolarsi.com ",
+		      tags = { "Dolar", "get" })
 	@GetMapping( produces = { MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<List<CotizacionDolarDTO>> getCotizacionActual() throws Excepcion
 	{

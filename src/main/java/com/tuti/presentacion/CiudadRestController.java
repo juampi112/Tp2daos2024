@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tuti.entidades.Ciudad;
 import com.tuti.servicios.CiudadService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 
 
@@ -24,6 +26,8 @@ import com.tuti.servicios.CiudadService;
  *  @author dardo
  *
  */
+//@Api(tags = { SwaggerConfig.CIUDADES })
+@Tag(name = "Ciudades", description = "Ciudades")
 public class CiudadRestController {
 
 

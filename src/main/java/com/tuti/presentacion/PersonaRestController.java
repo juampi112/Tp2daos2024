@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,6 +36,8 @@ import com.tuti.presentacion.error.MensajeError;
 import com.tuti.servicios.CiudadService;
 import com.tuti.servicios.PersonaService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 /**
  * Recurso Personas
@@ -45,6 +46,8 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/personas")
+//@Api(tags = { SwaggerConfig.PERSONAS })
+@Tag(name = "Personas", description = "Personas")
 public class PersonaRestController {
 	
 	@Autowired
@@ -63,6 +66,7 @@ public class PersonaRestController {
 	 * @return
 	 * @throws Excepcion 
 	 */
+	@Operation(summary = "Permite filtrar personas. ")
 	@GetMapping( produces = { MediaType.APPLICATION_JSON_VALUE})
 	public List<PersonaResponseDTO> filtrarPersonas(@RequestParam(name = "apellido",required = false) String apellido 
 			, @RequestParam(name = "nombre",required = false)  @jakarta.validation.constraints.Size(min = 1, max = 20) String nombre) throws Excepcion {
