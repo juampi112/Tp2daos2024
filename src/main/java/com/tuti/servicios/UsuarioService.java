@@ -1,7 +1,6 @@
 package com.tuti.servicios;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.tuti.entidades.Usuario;
 
@@ -21,6 +20,6 @@ public interface UsuarioService {
 	
 	public void delete(Long dni);
 	
-
+	public List<Usuario> getUsuario(String apellido, String nombre);
 }
 

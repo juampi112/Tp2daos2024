@@ -8,9 +8,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.tuti.accesoADatos.PersonaDao;
 import com.tuti.accesoADatos.UsuarioDAO;
-import com.tuti.entidades.Persona;
 import com.tuti.entidades.Usuario;
 import com.tuti.exception.Excepcion;
 import com.tuti.servicios.UsuarioService;
@@ -66,7 +64,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 	
 
-	
+	@Override
+	public List<Usuario> getUsuario(String apellido, String nombre) {
+		if(apellido==null && nombre==null)
+			return dao.findAll();
+		else
+			return dao.findByApellidoOrNombre(apellido, nombre);
+	}
 	
 	
 	
