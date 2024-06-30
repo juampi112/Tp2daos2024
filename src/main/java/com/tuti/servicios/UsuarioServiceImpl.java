@@ -3,7 +3,6 @@ package com.tuti.servicios;
 
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.tuti.accesoADatos.UsuarioDAO;
 import com.tuti.entidades.Usuario;
 import com.tuti.exception.Excepcion;
-import com.tuti.servicios.UsuarioService;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,14 +121,19 @@ public class UsuarioRestController {
 		// aca deberiamos traer una variable que obtenga todos los usuarios.
 
 		List<Usuario> usuario = service.getAll();
-		boolean existeDni;
-		boolean existePatente;
-		
-		for (Usuario pojo : usuario) {
-			dtos.add(buildResponse(pojo));
-		}
+		boolean noExisteDni = false;
+		boolean noExistePatente = false;
 
-		usuario.contains(form.toPojo().getDni());
+		for (Usuario u : usuario) {
+			if (u.getDni() == form.toPojo().getDni()) {
+				noExisteDni = true;
+				break;
+			}
+			if (u.getPatente().equals(form.toPojo().getPatente())) {
+				noExistePatente = true;
+				break;
+			}
+		}
 
 		if (result.hasErrors()) {
 			// Dos alternativas:
@@ -138,12 +142,10 @@ public class UsuarioRestController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearError(result));
 		} else if (form.toPojo().getSaldoCuenta() != null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearError(result));
-		} else if (usuario.contains(form.toPojo().getDni())) {
-			// e
+		} else if (noExisteDni) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(getError("03", "Dato no insertable", "No se puede insertar un dni duplicado."));
-		} else if (form.toPojo().getPatente() != null) {
-			// e
+		} else if (noExistePatente) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(getError("03", "Dato no insertable", "No se puede insertar una patente duplicada."));
 		}
@@ -159,8 +161,8 @@ public class UsuarioRestController {
 		 * ResponseEntity.status(HttpStatus.BAD_REQUEST).
 		 * body("La ciudad indicada no se encuentra en la base de datos.");
 		 * 
-		 * { { "dni": 20203131, "apellido": "Perez", "nombre": "Juan",
-		 * "patente":"123 ASD" }
+		 * { { "dni": 20203131, "apellido": "Perez", "nombre":
+		 * "Juan","patente":"123 ASD" }
 		 * 
 		 * 
 		 * 
@@ -190,10 +192,23 @@ public class UsuarioRestController {
 	@PutMapping("/{dni}")
 	public ResponseEntity<Object> actualizar(@RequestBody UsuarioForm form, @PathVariable long dni) throws Exception {
 		Usuario rta = service.getBydni(dni);
+
+		List<Usuario> usuario = service.getAll();
+		boolean noExistePatente = false;
+
+		for (Usuario u : usuario) {
+			if (u.getPatente().equals(form.toPojo().getPatente()) && u.getDni() != form.toPojo().getDni()) {
+				noExistePatente = true;
+				break;
+			}
+		}
+
 		if (rta == null)
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encuentra el usuario que desea modificar.");
-
-		else {
+		else if (noExistePatente) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(getError("03", "Dato no editable", "No se puede modificar una patente."));
+		} else {
 			Usuario u = form.toPojo();
 			if (!u.getDni().equals(dni))// El dni es el identificador, con lo cual es el único dato que no permito
 										// modificar
@@ -234,7 +249,6 @@ public class UsuarioRestController {
 		try {
 
 			UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
-
 			Link selfLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(pojo.getDni()).withSelfRel();
 
 			dto.add(selfLink);

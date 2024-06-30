@@ -1,7 +1,6 @@
 package com.tuti.presentacion;
 
 import com.tuti.entidades.Usuario;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -24,7 +23,6 @@ public class UsuarioForm {
 	private String nombre;
 	@NotNull
 	private String patente;
-	private Double saldoCuenta;
 	
 	public Long getDni() {
 		return dni;
@@ -50,14 +48,7 @@ public class UsuarioForm {
 	public void setPatente(String patente) {
 		this.patente = patente;
 	}
-	public Double getSaldoCuenta() {
-		return saldoCuenta;
-	}
-	public void setSaldoCuenta(Double saldoCuenta) {
-		this.saldoCuenta = saldoCuenta;
-	}
-	
-	
+
 	
 	public Usuario toPojo()
 	{
@@ -66,7 +57,6 @@ public class UsuarioForm {
 		u.setApellido(this.getApellido());
 		u.setNombre(this.getNombre());
 		u.setPatente(this.getPatente());
-		u.setSaldoCuenta(this.getSaldoCuenta());
 		return u;
 	}
 	
