@@ -68,15 +68,15 @@ public class UsuarioRestController {
 	 */
 	@Operation(summary = "Permite filtrar usuarios. ")
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
-	public List<UsuarioResponseDTO> filtrarUsuario(@RequestParam(name = "apellido", required = false) String apellido
-			, @RequestParam(name = "nombre",required = false)  String nombre) throws Excepcion {		
-		
-		List<Usuario> usuario = service.getUsuario(apellido,nombre);
-		List<UsuarioResponseDTO> dtos =new ArrayList<UsuarioResponseDTO>();
+	public List<UsuarioResponseDTO> filtrarUsuario(@RequestParam(name = "apellido", required = false) String apellido,
+			@RequestParam(name = "nombre", required = false) String nombre) throws Excepcion {
+
+		List<Usuario> usuario = service.getUsuario(apellido, nombre);
+		List<UsuarioResponseDTO> dtos = new ArrayList<UsuarioResponseDTO>();
 		for (Usuario pojo : usuario) {
-			
-	        dtos.add(buildResponse(pojo));
-		}		
+
+			dtos.add(buildResponse(pojo));
+		}
 		return dtos;
 	}
 
@@ -119,37 +119,53 @@ public class UsuarioRestController {
 	 */
 	@PostMapping
 	public ResponseEntity<Object> guardar(@Valid @RequestBody UsuarioForm form, BindingResult result) throws Exception {
+		// aca deberiamos traer una variable que obtenga todos los usuarios.
+
+		List<Usuario> usuario = service.getAll();
+		boolean existeDni;
+		boolean existePatente;
+		
+		for (Usuario pojo : usuario) {
+			dtos.add(buildResponse(pojo));
+		}
+
+		usuario.contains(form.toPojo().getDni());
 
 		if (result.hasErrors()) {
 			// Dos alternativas:
 			// throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 			// this.formatearError(result));
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearError(result));
-		}else if(form.toPojo().getSaldoCuenta() != null) {
+		} else if (form.toPojo().getSaldoCuenta() != null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearError(result));
+		} else if (usuario.contains(form.toPojo().getDni())) {
+			// e
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(getError("03", "Dato no insertable", "No se puede insertar un dni duplicado."));
+		} else if (form.toPojo().getPatente() != null) {
+			// e
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(getError("03", "Dato no insertable", "No se puede insertar una patente duplicada."));
 		}
 
 		Usuario u = form.toPojo();
-		
-/*		Optional<Ciudad> c = ciudadService.getById(form.getIdCiudad());
-		if (c.isPresent())
-			p.setCiudad(c.get());
-		else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-					getError("02", "Ciudad Requerida", "La ciudad indicada no se encuentra en la base de datos."));
-//				return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La ciudad indicada no se encuentra en la base de datos.");
- * 
- *{ 
-{ 
-    "dni": 20203131, 
-    "apellido": "Perez", 
-    "nombre": "Juan", 
-    "patente":"123 ASD"
-}
- * 
- * 
- * 
-		}*/
+
+		/*
+		 * Optional<Ciudad> c = ciudadService.getById(form.getIdCiudad()); if
+		 * (c.isPresent()) p.setCiudad(c.get()); else { return
+		 * ResponseEntity.status(HttpStatus.BAD_REQUEST).body( getError("02",
+		 * "Ciudad Requerida",
+		 * "La ciudad indicada no se encuentra en la base de datos.")); // return
+		 * ResponseEntity.status(HttpStatus.BAD_REQUEST).
+		 * body("La ciudad indicada no se encuentra en la base de datos.");
+		 * 
+		 * { { "dni": 20203131, "apellido": "Perez", "nombre": "Juan",
+		 * "patente":"123 ASD" }
+		 * 
+		 * 
+		 * 
+		 * }
+		 */
 
 		// ahora inserto el cliente
 		service.insert(u);
@@ -170,33 +186,24 @@ public class UsuarioRestController {
 	 * @return Persona Editada o error en otro caso
 	 * @throws Excepcion
 	 */
-	
-	/*
+
 	@PutMapping("/{dni}")
-	public ResponseEntity<Object> actualizar(@RequestBody PersonaForm form, @PathVariable long dni) throws Exception {
-		Optional<Persona> rta = service.getById(dni);
-		if (!rta.isPresent())
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encuentra la persona que desea modificar.");
+	public ResponseEntity<Object> actualizar(@RequestBody UsuarioForm form, @PathVariable long dni) throws Exception {
+		Usuario rta = service.getBydni(dni);
+		if (rta == null)
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encuentra el usuario que desea modificar.");
 
 		else {
-			Persona p = form.toPojo();
-			Optional<Ciudad> c = ciudadService.getById(form.getIdCiudad());
-			if (c.isPresent())
-				p.setCiudad(c.get());
-			else
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-						getError("02", "Ciudad Requerida", "La ciudad indicada no se encuentra en la base de datos."));
-//				return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("La ciudad indicada no se encuentra en la base de datos.");
-
-			if (!p.getDni().equals(dni))// El dni es el identificador, con lo cual es el único dato que no permito
+			Usuario u = form.toPojo();
+			if (!u.getDni().equals(dni))// El dni es el identificador, con lo cual es el único dato que no permito
 										// modificar
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body(getError("03", "Dato no editable", "Noi puede modificar el dni."));
-			service.update(p);
-			return ResponseEntity.ok(buildResponse(p));
+						.body(getError("03", "Dato no editable", "No se puede modificar el dni."));
+			service.update(u);
+			return ResponseEntity.ok(buildResponse(u));
 		}
 
-	}*/
+	}
 
 	/**
 	 * Borra la persona con el dni indicado curl --location --request DELETE
@@ -205,15 +212,15 @@ public class UsuarioRestController {
 	 * @param dni Dni de la persona a borrar
 	 * @return ok en caso de borrar exitosamente la persona, error en otro caso
 	 */
-	/*@DeleteMapping("/{dni}")
+	@DeleteMapping("/{dni}")
 	public ResponseEntity<String> eliminar(@PathVariable Long dni) {
-		if (!service.getById(dni).isPresent())
+		if (service.getBydni(dni) == null)
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No existe una persona con ese dni");
 		service.delete(dni);
 
 		return ResponseEntity.ok().build();
 
-	}*/
+	}
 
 	/**
 	 * Métdo auxiliar que toma los datos del pojo y construye el objeto a devolver
@@ -225,18 +232,16 @@ public class UsuarioRestController {
 	 */
 	private UsuarioResponseDTO buildResponse(Usuario pojo) throws Excepcion {
 		try {
-			
+
 			UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
 
-			Link selfLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class)
-					.slash(pojo.getDni())                
-					.withSelfRel();
+			Link selfLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(pojo.getDni()).withSelfRel();
 
 			dto.add(selfLink);
-			
-			return dto;			
-			//UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
-			//return dto;
+
+			return dto;
+			// UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
+			// return dto;
 		} catch (Exception e) {
 			throw new Excepcion(e.getMessage(), 500);
 		}
@@ -258,8 +263,8 @@ public class UsuarioRestController {
 		String json = maper.writeValueAsString(e1);
 		return json;
 	}
-	
-	/*controlar esto de get error*/
+
+	/* controlar esto de get error */
 	private String getError(String code, String err, String descr) throws JsonProcessingException {
 		MensajeError e1 = new MensajeError();
 		e1.setCodigo(code);
