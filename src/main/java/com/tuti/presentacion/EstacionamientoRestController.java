@@ -16,14 +16,18 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuti.dto.EstacionamientoResponseDTO;
 import com.tuti.entidades.Estacionamiento;
+import com.tuti.entidades.Usuario;
 import com.tuti.exception.Excepcion;
 import com.tuti.presentacion.error.MensajeError;
 import com.tuti.servicios.EstacionamientoService;
+import com.tuti.servicios.UsuarioService;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 
@@ -42,6 +46,8 @@ public class EstacionamientoRestController {
 	@Autowired
 	private EstacionamientoService service;
 
+	@Autowired
+	private UsuarioService serviceU;
 	/**
 	 * Permite filtrar personas. Ej1 curl --location --request GET
 	 * 'http://localhost:8081/personas?apellido=Perez&&nombre=Juan' Lista las
@@ -85,15 +91,34 @@ public class EstacionamientoRestController {
 	 * @return Persona encontrada o Not found en otro caso
 	 * @throws Excepcion
 	 */
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	@GetMapping(value = "/{patente}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<EstacionamientoResponseDTO> getPatente(@PathVariable String patente) throws Excepcion {
+	public ResponseEntity<EstacionamientoResponseDTO> getPatente(@PathVariable String patente,@RequestParam("password") String password) throws Excepcion {
+	    
+		boolean PasswordValida = service.validarPassword(patente, password);
+	    
+	    if (!PasswordValida) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	    }		
+		
 		Estacionamiento rta = service.getPatente(patente);
-		if (rta != null) {
-			Estacionamiento pojo = rta;
-			return new ResponseEntity<EstacionamientoResponseDTO>(buildResponse(pojo), HttpStatus.OK);
+		Usuario usuario = serviceU.getUsuarioByPatente(patente);
+		
+		if (rta != null && usuario!= null) {
+	        Estacionamiento pojo = rta;
+	        return new ResponseEntity<EstacionamientoResponseDTO>(buildResponse(pojo,usuario), HttpStatus.OK);            			        	   
 		} else
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();		
 	}
 
 	/**
@@ -219,9 +244,28 @@ public class EstacionamientoRestController {
 	 * @return
 	 * @throws Excepcion
 	 */
-	private EstacionamientoResponseDTO buildResponse(Estacionamiento pojo) throws Excepcion {
+	private EstacionamientoResponseDTO buildResponse(Estacionamiento pojo, Usuario usuario) throws Excepcion {
 		try {
 
+/*
+	        if (usuario != null) {	        	
+
+	            Link link = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(YourControllerClass.class).getDatosS01(usuario.getDni())).withRel("datosS01");
+
+
+	            response.setDni(usuario.getDni());
+	            response.add(link);
+	            
+				        	
+	        } 			
+			*/
+			
+			
+			
+			
+			
+			
+			
 			EstacionamientoResponseDTO dto = new EstacionamientoResponseDTO(pojo);
 			Link selfLink = WebMvcLinkBuilder.linkTo(EstacionamientoRestController.class).slash(pojo.getPatente()).withSelfRel();
 			dto.add(selfLink);

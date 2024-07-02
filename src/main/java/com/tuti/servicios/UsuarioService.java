@@ -21,5 +21,8 @@ public interface UsuarioService {
 	public void delete(Long dni);
 	
 	public List<Usuario> getUsuario(String apellido, String nombre);
+
+	public Usuario getUsuarioByPatente(String patente);
+	
 }
 

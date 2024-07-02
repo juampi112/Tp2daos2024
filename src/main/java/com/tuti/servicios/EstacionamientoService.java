@@ -14,6 +14,7 @@ public interface EstacionamientoService {
 	
 	public void update(Estacionamiento e);
 
+	public Boolean validarPassword(String patente,String password);
 
 	
 }

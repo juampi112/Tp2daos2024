@@ -12,4 +12,7 @@ public interface UsuarioDAO extends JpaRepository<Usuario, Long> {
 	public Usuario findBydni(Long dni);
 
 	public List<Usuario> findByApellidoOrNombre(String apellido, String nombre);
+	
+	public Usuario findByPatente(String patente);
+	
 }

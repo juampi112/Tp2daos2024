@@ -23,7 +23,7 @@ public class EstacionamientoServiceImpl implements EstacionamientoService {
 	private EstacionamientoDAO dao;
 	@Override
 	public Estacionamiento getPatente(String patente) {
-		return  dao.findByPatente(patente);
+		return  dao.findTopByPatente(patente);
 	}
 	@Override
 	public void update(Estacionamiento e) {
@@ -45,5 +45,12 @@ public class EstacionamientoServiceImpl implements EstacionamientoService {
 			dao.save(e);
 	}
 	
+	@Override
+	public Boolean validarPassword(String patente,String password) {
+		if(patente!=null && password!=null)
+			return dao.validarPassword(patente,password);
+		else
+			return false;
+	}	
 }
 
