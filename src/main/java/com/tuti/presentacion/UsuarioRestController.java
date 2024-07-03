@@ -28,9 +28,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuti.dto.UsuarioResponseDTO;
+import com.tuti.entidades.Estacionamiento;
 import com.tuti.entidades.Usuario;
 import com.tuti.exception.Excepcion;
 import com.tuti.presentacion.error.MensajeError;
+import com.tuti.servicios.EstacionamientoService;
 import com.tuti.servicios.UsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +53,8 @@ public class UsuarioRestController {
 
 	@Autowired
 	private UsuarioService service;
-
+	@Autowired
+	private EstacionamientoService serviceEstacionamiento;
 	/**
 	 * Permite filtrar personas. Ej1 curl --location --request GET
 	 * 'http://localhost:8081/personas?apellido=Perez&&nombre=Juan' Lista las
@@ -161,6 +164,8 @@ public class UsuarioRestController {
 		 * ResponseEntity.status(HttpStatus.BAD_REQUEST).
 		 * body("La ciudad indicada no se encuentra en la base de datos.");
 		 * 
+		 * 
+		 * http://localhost:8081/usuario
 		 * { { "dni": 20203131, "apellido": "Perez", "nombre":
 		 * "Juan","patente":"123 ASD" }
 		 * 
@@ -249,22 +254,19 @@ public class UsuarioRestController {
 		try {
 
 			UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
-			Link selfLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(pojo.getDni()).withSelfRel();
-			Link estacionLink = WebMvcLinkBuilder.linkTo(EstacionamientoRestController.class).slash(pojo.getPatente()).withSelfRel();
-			
-			
-			
-			Link ciudadLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(CiudadRestController.class)
-						.getById(pojo.getCiudad().getId()))
-						.withRel("ciudad");
-			
+			Estacionamiento est =  new Estacionamiento();
+			est = serviceEstacionamiento.getPatente(pojo.getPatente());
+	
+			Link selfLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(pojo.getDni()).withRel("Usuario");
+			Link estacionLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EstacionamientoRestController.class)
+					.getPatente(pojo.getPatente(),est.getContraDeUsuario()))
+					.withRel("Estacionamiento");					
+
 			
 			dto.add(selfLink);
 			dto.add(estacionLink);
 
 			return dto;
-			// UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
-			// return dto;
 		} catch (Exception e) {
 			throw new Excepcion(e.getMessage(), 500);
 		}

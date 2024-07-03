@@ -1,11 +1,13 @@
 package com.tuti.servicios;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.tuti.accesoADatos.EstacionamientoDAO;
 import com.tuti.entidades.Estacionamiento;
+import com.tuti.entidades.Usuario;
 import com.tuti.exception.Excepcion;
 
 import jakarta.validation.ConstraintViolation;
@@ -24,6 +26,10 @@ public class EstacionamientoServiceImpl implements EstacionamientoService {
 	@Override
 	public Estacionamiento getPatente(String patente) {
 		return  dao.findTopByPatente(patente);
+	}
+	@Override
+	public List<Estacionamiento> getAll() {
+		return dao.findAll();
 	}
 	@Override
 	public void update(Estacionamiento e) {

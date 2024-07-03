@@ -1,5 +1,6 @@
 package com.tuti.presentacion;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,9 +16,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuti.dto.EstacionamientoResponseDTO;
@@ -30,7 +34,9 @@ import com.tuti.presentacion.error.MensajeError;
 import com.tuti.servicios.EstacionamientoService;
 import com.tuti.servicios.UsuarioService;
 
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 
 /**
@@ -92,16 +98,9 @@ public class EstacionamientoRestController {
 	 * @param id DNI de la persona buscada
 	 * @return Persona encontrada o Not found en otro caso
 	 * @throws Excepcion
+	 * 
+	 * http://localhost:8081/Estacionamiento/2?password=2
 	 */
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	@GetMapping(value = "/{patente}", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -133,20 +132,21 @@ public class EstacionamientoRestController {
 	 * @return Persona insertada o error en otro caso
 	 * @throws Exception
 	 */
-/*	@PostMapping
-	public ResponseEntity<Object> guardar(@Valid @RequestBody UsuarioForm form, BindingResult result) throws Exception {
-		// aca deberiamos traer una variable que obtenga todos los usuarios.
+	@PostMapping
+	public ResponseEntity<Object> guardar(@Valid @RequestBody EstacionamientoForm form, BindingResult result) throws Exception {
+		
+		// aca deberiamos traer una variable que obtenga todos los estacionamientos para validar la patente.
 
-		List<Usuario> usuario = service.getAll();
-		boolean noExisteDni = false;
+//		se va a ingreasar una unica vez el estacionamiento, con estado liberado y dni q no se repita y contraseña
+
+		
+		//Estacionamiento e = service.getPatente(form.getPatente());//ver si esto esta bien
+	
+		List<Estacionamiento> estacionamientos = service.getAll();
 		boolean noExistePatente = false;
 
-		for (Usuario u : usuario) {
-			if (u.getDni() == form.toPojo().getDni()) {
-				noExisteDni = true;
-				break;
-			}
-			if (u.getPatente().equals(form.toPojo().getPatente())) {
+		for (Estacionamiento e : estacionamientos) {
+			if (e.getPatente().equals(form.toPojo().getPatente())) {
 				noExistePatente = true;
 				break;
 			}
@@ -157,43 +157,24 @@ public class EstacionamientoRestController {
 			// throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 			// this.formatearError(result));
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearError(result));
-		} else if (form.toPojo().getSaldoCuenta() != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearError(result));
-		} else if (noExisteDni) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(getError("03", "Dato no insertable", "No se puede insertar un dni duplicado."));
 		} else if (noExistePatente) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(getError("03", "Dato no insertable", "No se puede insertar una patente duplicada."));
-		}
+		}		
+		
 
-		Usuario u = form.toPojo();
+		///hasta aca hicimos ver como sigue
 
-		/*
-		 * Optional<Ciudad> c = ciudadService.getById(form.getIdCiudad()); if
-		 * (c.isPresent()) p.setCiudad(c.get()); else { return
-		 * ResponseEntity.status(HttpStatus.BAD_REQUEST).body( getError("02",
-		 * "Ciudad Requerida",
-		 * "La ciudad indicada no se encuentra en la base de datos.")); // return
-		 * ResponseEntity.status(HttpStatus.BAD_REQUEST).
-		 * body("La ciudad indicada no se encuentra en la base de datos.");
-		 * 
-		 * { { "dni": 20203131, "apellido": "Perez", "nombre":
-		 * "Juan","patente":"123 ASD" }
-		 * 
-		 * 
-		 * 
-		 * }
-		 */
-
-	/*	// ahora inserto el cliente
-		service.insert(u);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{dni}").buildAndExpand(u.getDni())
+		Estacionamiento esta = form.toPojo();
+		
+		service.insert(esta);
+		
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{patente}").buildAndExpand(esta.getPatente())
 				.toUri(); // Por convención en REST, se devuelve la url del recurso recién creado
 
 		return ResponseEntity.created(location).build();// 201 (Recurso creado correctamente)
 
-	}*/
+	}
 
 	/**
 	 * Modifica una persona existente en la base de datos: curl --location --request
@@ -208,6 +189,9 @@ public class EstacionamientoRestController {
 
 /*	@PutMapping("/{dni}")
 	public ResponseEntity<Object> actualizar(@RequestBody UsuarioForm form, @PathVariable long dni) throws Exception {
+	
+//cuando se actualize se va a cambiar el estado de libre a ocupado y viseversa.. chequear los estados apra que no se repitan.. 
+ //fin,.. <3<3
 		Usuario rta = service.getBydni(dni);
 
 		List<Usuario> usuario = service.getAll();
@@ -250,12 +234,16 @@ public class EstacionamientoRestController {
 		try {
 			
 			EstacionamientoResponseDTO dto = new EstacionamientoResponseDTO(pojo);
-			Link selfLink = WebMvcLinkBuilder.linkTo(EstacionamientoRestController.class).slash(pojo.getPatente()).withSelfRel();
-			Link usuarioLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(usuario.getDni()).withSelfRel();
-						
-			dto.add(selfLink);
+			Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EstacionamientoRestController.class)
+					.getPatente(pojo.getPatente(),pojo.getContraDeUsuario()))
+					.withRel("Estacionamiento");
+			
+	        Link usuarioLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(usuario.getDni()).withRel("Usuario");		
+			
+	        dto.add(selfLink);
+	        dto.setDni(usuario.getDni());
 			dto.add(usuarioLink);
-			return dto;
+			return dto;	
 		} catch (Exception e) {
 			throw new Excepcion(e.getMessage(), 500);
 		}

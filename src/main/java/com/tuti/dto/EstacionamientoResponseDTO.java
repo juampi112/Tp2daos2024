@@ -14,18 +14,18 @@ public class EstacionamientoResponseDTO extends RepresentationModel<Estacionamie
 
 	private String patente;
 	private String estado;
-
-	
+	private Long dni;	
 
 	public EstacionamientoResponseDTO() {
 		super();
 	}
 
 
-	public EstacionamientoResponseDTO(String patente, String estado) {
+	public EstacionamientoResponseDTO(String patente, String estado, Long dni) {
 		super();
 		this.patente = patente;
 		this.estado = estado;
+		this.dni = dni;
 	}
 
 
@@ -58,6 +58,16 @@ public class EstacionamientoResponseDTO extends RepresentationModel<Estacionamie
 		this.estado = estado;
 	}
 
+
+
+	public Long getDni() {
+		return dni;
+	}
+
+
+	public void setDni(Long dni) {
+		this.dni = dni;
+	}
 
 
 	@Override
