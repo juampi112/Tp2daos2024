@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuti.dto.EstacionamientoResponseDTO;
+import com.tuti.dto.PersonaResponseDTO;
+import com.tuti.dto.UsuarioResponseDTO;
 import com.tuti.entidades.Estacionamiento;
 import com.tuti.entidades.Usuario;
 import com.tuti.exception.Excepcion;
@@ -246,33 +248,14 @@ public class EstacionamientoRestController {
 	 */
 	private EstacionamientoResponseDTO buildResponse(Estacionamiento pojo, Usuario usuario) throws Excepcion {
 		try {
-
-/*
-	        if (usuario != null) {	        	
-
-	            Link link = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(YourControllerClass.class).getDatosS01(usuario.getDni())).withRel("datosS01");
-
-
-	            response.setDni(usuario.getDni());
-	            response.add(link);
-	            
-				        	
-	        } 			
-			*/
-			
-			
-			
-			
-			
-			
 			
 			EstacionamientoResponseDTO dto = new EstacionamientoResponseDTO(pojo);
 			Link selfLink = WebMvcLinkBuilder.linkTo(EstacionamientoRestController.class).slash(pojo.getPatente()).withSelfRel();
+			Link usuarioLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(usuario.getDni()).withSelfRel();
+						
 			dto.add(selfLink);
-
+			dto.add(usuarioLink);
 			return dto;
-			// UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
-			// return dto;
 		} catch (Exception e) {
 			throw new Excepcion(e.getMessage(), 500);
 		}

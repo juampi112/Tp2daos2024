@@ -250,8 +250,17 @@ public class UsuarioRestController {
 
 			UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
 			Link selfLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(pojo.getDni()).withSelfRel();
-
+			Link estacionLink = WebMvcLinkBuilder.linkTo(EstacionamientoRestController.class).slash(pojo.getPatente()).withSelfRel();
+			
+			
+			
+			Link ciudadLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(CiudadRestController.class)
+						.getById(pojo.getCiudad().getId()))
+						.withRel("ciudad");
+			
+			
 			dto.add(selfLink);
+			dto.add(estacionLink);
 
 			return dto;
 			// UsuarioResponseDTO dto = new UsuarioResponseDTO(pojo);
