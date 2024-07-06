@@ -44,10 +44,4 @@ public class EstacionamientoForm {
 		return e;
 	}
 
-	@Override
-	public String toString() {
-		return "EstacionamientoForm [patente=" + patente + ", contraDeUsuario=" + contraDeUsuario + ", estado=" + estado
-				+ "]";
-	}
-
 }
