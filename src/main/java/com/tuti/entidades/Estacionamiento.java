@@ -1,4 +1,5 @@
 package com.tuti.entidades;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,16 +10,13 @@ public class Estacionamiento {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	private String patente;
 	private String contraDeUsuario;
 	private String estado;
 
-	
-
 	public Estacionamiento() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Estacionamiento(Long id, String patente, String contraDeUsuario, String estado) {
@@ -60,5 +58,4 @@ public class Estacionamiento {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 }

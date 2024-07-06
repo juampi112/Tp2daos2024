@@ -4,11 +4,6 @@ import org.springframework.hateoas.RepresentationModel;
 
 import com.tuti.entidades.Usuario;
 
-/**
- * Objeto utilizado para construir la respuesta de los servicios
- * 
- *
- */
 public class UsuarioResponseDTO extends RepresentationModel<UsuarioResponseDTO> {
 
 	private Long dni;
@@ -60,7 +55,6 @@ public class UsuarioResponseDTO extends RepresentationModel<UsuarioResponseDTO> 
 	public void setPatente(String patente) {
 		this.patente = patente;
 	}
-
 
 	@Override
 	public String toString() {

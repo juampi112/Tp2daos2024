@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,8 +26,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuti.dto.EstacionamientoResponseDTO;
-import com.tuti.dto.PersonaResponseDTO;
-import com.tuti.dto.UsuarioResponseDTO;
 import com.tuti.entidades.Estacionamiento;
 import com.tuti.entidades.Usuario;
 import com.tuti.exception.Excepcion;
@@ -34,19 +33,13 @@ import com.tuti.presentacion.error.MensajeError;
 import com.tuti.servicios.EstacionamientoService;
 import com.tuti.servicios.UsuarioService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-
-/**
- * Recurso Usuario
- * 
- * @author
- *
- */
 @RestController
-@RequestMapping("/Estacionamiento")
+@RequestMapping("/estacionamiento")
 //@Api(tags = { SwaggerConfig.USUARIO })
 @Tag(name = "Estacionamiento", description = "Estacionamiento")
 public class EstacionamientoRestController {
@@ -56,201 +49,154 @@ public class EstacionamientoRestController {
 
 	@Autowired
 	private UsuarioService serviceU;
-	/**
-	 * Permite filtrar personas. Ej1 curl --location --request GET
-	 * 'http://localhost:8081/personas?apellido=Perez&&nombre=Juan' Lista las
-	 * personas llamadas Perez, Juan Ej2 curl --location --request GET
-	 * 'http://localhost:8081/personas?apellido=Perez' Lista aquellas personas de
-	 * apellido PErez Ej3 curl --location --request GET
-	 * 'http://localhost:8081/personas' Lista todas las personas
-	 * 
-	 * @param apellido
-	 * @param nombre
-	 * @return
-	 * @throws Excepcion
-	 */
-/*	@Operation(summary = "Permite filtrar usuarios. ")
+
+	@Operation(summary = "Permite filtrar estacionamientos. ")
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
-	public List<UsuarioResponseDTO> filtrarUsuario(@RequestParam(name = "apellido", required = false) String apellido,
-			@RequestParam(name = "nombre", required = false) String nombre) throws Excepcion {
+	public List<EstacionamientoResponseDTO> filtrarEstacionamientos(
+			@RequestParam(name = "patente", required = false) String patente) throws Excepcion {
 
-		List<Usuario> usuario = service.getUsuario(apellido, nombre);
-		List<UsuarioResponseDTO> dtos = new ArrayList<UsuarioResponseDTO>();
-		for (Usuario pojo : usuario) {
-
-			dtos.add(buildResponse(pojo));
+		List<Estacionamiento> est = service.getAll();
+		List<EstacionamientoResponseDTO> dtos = new ArrayList<EstacionamientoResponseDTO>();
+		for (Estacionamiento pojo : est) {
+			Usuario u = serviceU.getUsuarioByPatente(pojo.getPatente());
+			dtos.add(buildResponse(pojo, u));
 		}
 		return dtos;
-	}*/
-
-	/*
-	 * public UsuarioResponseDTO(Usuario pojo) { super(); this.apellido =
-	 * pojo.getApellido(); this.nombre = pojo.getNombre(); this.dni = pojo.getDni();
-	 * this.patente = pojo.getPatente(); this.saldoCuenta = pojo.getSaldoCuenta();
-	 * 
-	 * }
-	 */
-
-	/**
-	 * Busca una persona a partir de su dni curl --location --request GET
-	 * 'http://localhost:8081/personas/27837171'
-	 * 
-	 * @param id DNI de la persona buscada
-	 * @return Persona encontrada o Not found en otro caso
-	 * @throws Excepcion
-	 * 
-	 * http://localhost:8081/Estacionamiento/2?password=2
-	 */
-	
-	
-	@GetMapping(value = "/{patente}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<EstacionamientoResponseDTO> getPatente(@PathVariable String patente,@RequestParam("password") String password) throws Excepcion {
-	    
-		boolean PasswordValida = service.validarPassword(patente, password);
-	    
-	    if (!PasswordValida) {
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-	    }		
-		
-		Estacionamiento rta = service.getPatente(patente);
-		Usuario usuario = serviceU.getUsuarioByPatente(patente);
-		
-		if (rta != null && usuario!= null) {
-	        Estacionamiento pojo = rta;
-	        return new ResponseEntity<EstacionamientoResponseDTO>(buildResponse(pojo,usuario), HttpStatus.OK);            			        	   
-		} else
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();		
 	}
 
-	/**
-	 * Inserta una nueva persona en la base de datos curl --location --request POST
-	 * 'http://localhost:8081/personas' --header 'Accept: application/json' --header
-	 * 'Content-Type: application/json' --data-raw '{ "dni": 27837171, "apellido":
-	 * "perez", "nombre": "juan", "idCiudad": 2 }'
-	 * 
-	 * @param p Persona a insertar
-	 * @return Persona insertada o error en otro caso
-	 * @throws Exception
-	 */
+	@GetMapping(value = "/{patente}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<EstacionamientoResponseDTO> getPatenteEstacionamiento(@PathVariable String patente)
+			throws Excepcion {
+
+		/*
+		 * boolean PasswordValida = service.validarPassword(patente, password);
+		 * 
+		 * if (!PasswordValida) { return
+		 * ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); }
+		 */
+		Estacionamiento rta = service.getPatente(patente);
+		Usuario usuario = serviceU.getUsuarioByPatente(patente);
+
+		if (rta != null) {
+			Estacionamiento pojo = rta;
+			return new ResponseEntity<EstacionamientoResponseDTO>(buildResponse(pojo, usuario), HttpStatus.OK);
+		} else
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	}
+
 	@PostMapping
-	public ResponseEntity<Object> guardar(@Valid @RequestBody EstacionamientoForm form, BindingResult result) throws Exception {
-		
-		// aca deberiamos traer una variable que obtenga todos los estacionamientos para validar la patente.
+	public ResponseEntity<Object> guardarEstacionamiento(@Valid @RequestBody EstacionamientoForm form,
+			BindingResult result) throws Exception {
+
+		// aca deberiamos traer una variable que obtenga todos los estacionamientos para
+		// validar la patente.
 
 //		se va a ingreasar una unica vez el estacionamiento, con estado liberado y dni q no se repita y contraseña
 
-		
-		//Estacionamiento e = service.getPatente(form.getPatente());//ver si esto esta bien
-	
+		// Estacionamiento e = service.getPatente(form.getPatente());//ver si esto esta
+		// bien
+
+		// Imprimir valores para depuración
+		form.toString();
+		System.out.println("Patente en form: " + form.toPojo().getPatente());
+		System.out.println("Estado en form: " + form.toPojo().getEstado());
+		System.out.println("ContraDeUsuario en form: " + form.toPojo().getContraDeUsuario());
+
 		List<Estacionamiento> estacionamientos = service.getAll();
 		boolean noExistePatente = false;
 
 		for (Estacionamiento e : estacionamientos) {
-			if (e.getPatente().equals(form.toPojo().getPatente())) {
+			if (e.getPatente() != null && e.getPatente().equals(form.toPojo().getPatente())) {
 				noExistePatente = true;
 				break;
 			}
 		}
 
 		if (result.hasErrors()) {
-			// Dos alternativas:
-			// throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-			// this.formatearError(result));
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearError(result));
 		} else if (noExistePatente) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(getError("03", "Dato no insertable", "No se puede insertar una patente duplicada."));
-		}		
-		
-
-		///hasta aca hicimos ver como sigue
-
-		Estacionamiento esta = form.toPojo();
-		
-		service.insert(esta);
-		
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{patente}").buildAndExpand(esta.getPatente())
-				.toUri(); // Por convención en REST, se devuelve la url del recurso recién creado
-
-		return ResponseEntity.created(location).build();// 201 (Recurso creado correctamente)
-
-	}
-
-	/**
-	 * Modifica una persona existente en la base de datos: curl --location --request
-	 * PUT 'http://localhost:8081/personas/27837176' --header 'Accept:
-	 * application/json' --header 'Content-Type: application/json' --data-raw '{
-	 * "apellido": "Perez", "nombre": "Juan Martin" "idCiudad": 1 }'
-	 * 
-	 * @param p Persona a modificar
-	 * @return Persona Editada o error en otro caso
-	 * @throws Excepcion
-	 */
-
-/*	@PutMapping("/{dni}")
-	public ResponseEntity<Object> actualizar(@RequestBody UsuarioForm form, @PathVariable long dni) throws Exception {
-	
-//cuando se actualize se va a cambiar el estado de libre a ocupado y viseversa.. chequear los estados apra que no se repitan.. 
- //fin,.. <3<3
-		Usuario rta = service.getBydni(dni);
-
-		List<Usuario> usuario = service.getAll();
-		boolean noExistePatente = false;
-
-		for (Usuario u : usuario) {
-			if (u.getPatente().equals(form.toPojo().getPatente()) && u.getDni() != form.toPojo().getDni()) {
-				noExistePatente = true;
-				break;
-			}
-		}
-
-		if (rta == null)
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encuentra el usuario que desea modificar.");
-		else if (noExistePatente) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(getError("03", "Dato no editable", "No se puede modificar una patente."));
 		} else {
-			Usuario u = form.toPojo();
-			if (!u.getDni().equals(dni))// El dni es el identificador, con lo cual es el único dato que no permito
-										// modificar
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body(getError("03", "Dato no editable", "No se puede modificar el dni."));
-			service.update(u);
-			return ResponseEntity.ok(buildResponse(u));
+
+			Estacionamiento est = form.toPojo();
+
+			service.insert(est);
+			URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{patente}")
+					.buildAndExpand(est.getPatente()).toUri();
+
+			return ResponseEntity.created(location).build();
 		}
+	}
+
+	@PutMapping("/{patente}")
+	public ResponseEntity<Object> actualizar1(@RequestBody EstacionamientoForm form, @PathVariable String patente)
+			throws Exception {
+		// Usuario rta = service.getBydni(dni);
+
+		Estacionamiento e = service.getPatente(patente);
+		// e.setEstado(form.toPojo().getEstado());
+
+		System.out.println("Patente en form: " + form.toPojo().getPatente());
+		System.out.println("Estado en form: " + form.toPojo().getEstado());
+		System.out.println("ContraDeUsuario en form: " + form.toPojo().getContraDeUsuario());
+
+		Estacionamiento ePojo = form.toPojo();
+
+		// service.update(ePojo);
+
+		Usuario u = serviceU.getUsuarioByPatente(patente);
+
+		return ResponseEntity.ok(buildResponse(e, u));
+		/*
+		 * List<Usuario> usuario = service.getAll(); boolean noExistePatente = false;
+		 * 
+		 * for (Usuario u : usuario) { if
+		 * (u.getPatente().equals(form.toPojo().getPatente()) && u.getDni() !=
+		 * form.toPojo().getDni()) { noExistePatente = true; break; } }
+		 * 
+		 * if (rta == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).
+		 * body("No se encuentra el usuario que desea modificar."); else if
+		 * (noExistePatente) { return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+		 * .body(getError("03", "Dato no editable",
+		 * "No se puede modificar una patente.")); } else { Usuario u = form.toPojo();
+		 * if (!u.getDni().equals(dni))// El dni es el identificador, con lo cual es el
+		 * único dato que no permito // modificar return
+		 * ResponseEntity.status(HttpStatus.BAD_REQUEST) .body(getError("03",
+		 * "Dato no editable", "No se puede modificar el dni.")); service.update(u);
+		 * return ResponseEntity.ok(buildResponse(u)); }
+		 */
 
 	}
-*/
 
-	/**
-	 * Métdo auxiliar que toma los datos del pojo y construye el objeto a devolver
-	 * en la response, con su hipervinculos
-	 * 
-	 * @param pojo
-	 * @return
-	 * @throws Excepcion
-	 */
 	private EstacionamientoResponseDTO buildResponse(Estacionamiento pojo, Usuario usuario) throws Excepcion {
 		try {
-			
+
 			EstacionamientoResponseDTO dto = new EstacionamientoResponseDTO(pojo);
 			Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EstacionamientoRestController.class)
-					.getPatente(pojo.getPatente(),pojo.getContraDeUsuario()))
-					.withRel("Estacionamiento");
-			
-	        Link usuarioLink = WebMvcLinkBuilder.linkTo(UsuarioRestController.class).slash(usuario.getDni()).withRel("Usuario");		
-			
-	        dto.add(selfLink);
-	        dto.setDni(usuario.getDni());
-			dto.add(usuarioLink);
-			return dto;	
+					.getPatenteEstacionamiento(pojo.getPatente())).withRel("Estacionamiento");
+
+			dto.add(selfLink);
+
+			Usuario usu = new Usuario();
+			usu = serviceU.getUsuarioByPatente(pojo.getPatente());
+
+			if (usu != null) {
+				Link usuarioLink = WebMvcLinkBuilder
+						.linkTo(WebMvcLinkBuilder.methodOn(UsuarioRestController.class).getBydni(usu.getDni()))
+						.withRel("Usuario");
+
+				dto.setDni(usuario.getDni());
+				dto.add(usuarioLink);
+			}
+
+			return dto;
 		} catch (Exception e) {
 			throw new Excepcion(e.getMessage(), 500);
 		}
 	}
 
 	private String formatearError(BindingResult result) throws JsonProcessingException {
-//		primero transformamos la lista de errores devuelta por Java Bean Validation
 		List<Map<String, String>> errores = result.getFieldErrors().stream().map(err -> {
 			Map<String, String> error = new HashMap<>();
 			error.put(err.getField(), err.getDefaultMessage());
@@ -260,13 +206,11 @@ public class EstacionamientoRestController {
 		e1.setCodigo("01");
 		e1.setMensajes(errores);
 
-		// ahora usamos la librería Jackson para pasar el objeto a json
 		ObjectMapper maper = new ObjectMapper();
 		String json = maper.writeValueAsString(e1);
 		return json;
 	}
 
-	/* controlar esto de get error */
 	private String getError(String code, String err, String descr) throws JsonProcessingException {
 		MensajeError e1 = new MensajeError();
 		e1.setCodigo(code);
@@ -276,10 +220,8 @@ public class EstacionamientoRestController {
 		errores.add(error);
 		e1.setMensajes(errores);
 
-		// ahora usamos la librería Jackson para pasar el objeto a json
 		ObjectMapper maper = new ObjectMapper();
 		String json = maper.writeValueAsString(e1);
 		return json;
 	}
-
 }

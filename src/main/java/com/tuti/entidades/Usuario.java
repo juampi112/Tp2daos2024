@@ -1,11 +1,9 @@
 package com.tuti.entidades;
 
-
 import java.util.Date;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
-
 
 @Entity
 public class Usuario {
@@ -23,12 +21,9 @@ public class Usuario {
 	private String contraseña;
 	private Double saldoCuenta;
 
-	
-	//PROBAR CREAR USUARIO SIN DNI
 	public Usuario() {
 		super();
 	}
-
 
 	public Usuario(Long dni, String nombre, String apellido, String domicilio, String email, Date fechaDeNacimiento,
 			String patente, String contraseña) {
@@ -41,7 +36,6 @@ public class Usuario {
 		this.fechaDeNacimiento = fechaDeNacimiento;
 		this.patente = patente;
 		this.contraseña = contraseña;
-		//SAQUE SALDO
 	}
 
 	public Long getDni() {
@@ -107,7 +101,7 @@ public class Usuario {
 	public void setContraseña(String contraseña) {
 		this.contraseña = contraseña;
 	}
-	
+
 	public Double getSaldoCuenta() {
 		return saldoCuenta;
 	}
