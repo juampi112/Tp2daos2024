@@ -36,7 +36,6 @@ import com.tuti.servicios.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/estacionamiento")
@@ -68,12 +67,6 @@ public class EstacionamientoRestController {
 	public ResponseEntity<EstacionamientoResponseDTO> getPatenteEstacionamiento(@PathVariable String patente)
 			throws Excepcion {
 
-		/*
-		 * boolean PasswordValida = service.validarPassword(patente, password);
-		 * 
-		 * if (!PasswordValida) { return
-		 * ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); }
-		 */
 		Estacionamiento rta = service.getPatente(patente);
 		Usuario usuario = serviceU.getUsuarioByPatente(patente);
 
@@ -85,22 +78,9 @@ public class EstacionamientoRestController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Object> guardarEstacionamiento(@Valid @RequestBody EstacionamientoForm form,
-			BindingResult result) throws Exception {
-
-		// aca deberiamos traer una variable que obtenga todos los estacionamientos para
-		// validar la patente.
-
-//		se va a ingreasar una unica vez el estacionamiento, con estado liberado y dni q no se repita y contraseña
-
-		// Estacionamiento e = service.getPatente(form.getPatente());//ver si esto esta
-		// bien
-
-		// Imprimir valores para depuración
-		form.toString();
-		System.out.println("Patente en form: " + form.toPojo().getPatente());
-		System.out.println("Estado en form: " + form.toPojo().getEstado());
-		System.out.println("ContraDeUsuario en form: " + form.toPojo().getContraDeUsuario());
+	public ResponseEntity<Object> guardarEstacionamiento(@RequestBody EstacionamientoForm form, BindingResult result)
+			throws Exception {
+		// este metodo devuelve null form.toPojo() y no sabemos xq
 
 		List<Estacionamiento> estacionamientos = service.getAll();
 		boolean noExistePatente = false;
@@ -130,43 +110,19 @@ public class EstacionamientoRestController {
 	}
 
 	@PutMapping("/{patente}")
-	public ResponseEntity<Object> actualizar1(@RequestBody EstacionamientoForm form, @PathVariable String patente)
-			throws Exception {
-		// Usuario rta = service.getBydni(dni);
+	public ResponseEntity<Object> actualizarEstacionamiento(@RequestBody EstacionamientoForm form,
+			@PathVariable String patente) throws Exception {
+
+		// este metodo devuelve null form.toPojo() y no sabemos xq
 
 		Estacionamiento e = service.getPatente(patente);
-		// e.setEstado(form.toPojo().getEstado());
-
-		System.out.println("Patente en form: " + form.toPojo().getPatente());
-		System.out.println("Estado en form: " + form.toPojo().getEstado());
-		System.out.println("ContraDeUsuario en form: " + form.toPojo().getContraDeUsuario());
+		//e.setEstado(form.toPojo().getEstado());
 
 		Estacionamiento ePojo = form.toPojo();
-
-		// service.update(ePojo);
-
+		//service.update(ePojo);
+		
 		Usuario u = serviceU.getUsuarioByPatente(patente);
-
 		return ResponseEntity.ok(buildResponse(e, u));
-		/*
-		 * List<Usuario> usuario = service.getAll(); boolean noExistePatente = false;
-		 * 
-		 * for (Usuario u : usuario) { if
-		 * (u.getPatente().equals(form.toPojo().getPatente()) && u.getDni() !=
-		 * form.toPojo().getDni()) { noExistePatente = true; break; } }
-		 * 
-		 * if (rta == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).
-		 * body("No se encuentra el usuario que desea modificar."); else if
-		 * (noExistePatente) { return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-		 * .body(getError("03", "Dato no editable",
-		 * "No se puede modificar una patente.")); } else { Usuario u = form.toPojo();
-		 * if (!u.getDni().equals(dni))// El dni es el identificador, con lo cual es el
-		 * único dato que no permito // modificar return
-		 * ResponseEntity.status(HttpStatus.BAD_REQUEST) .body(getError("03",
-		 * "Dato no editable", "No se puede modificar el dni.")); service.update(u);
-		 * return ResponseEntity.ok(buildResponse(u)); }
-		 */
-
 	}
 
 	private EstacionamientoResponseDTO buildResponse(Estacionamiento pojo, Usuario usuario) throws Excepcion {
